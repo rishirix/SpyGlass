@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Spyglass Report - Scan {{ scan.id }}</title>
+<style>
+  @page { size: A4 landscape; margin: 1cm; }
+  body { font-family: Helvetica, Arial, sans-serif; color: #111; font-size: 9px; {% if not pdf %}max-width: 980px; margin: 24px auto; padding: 0 16px;{% endif %} }
+  h1 { font-size: 22px; margin-bottom: 2px; } h2 { font-size: 15px; border-bottom: 1px solid #999; padding-bottom: 3px; margin-top: 22px; }
+  .banner { padding: 6px 10px; font-weight: bold; margin: 10px 0; {% if scan.mode == 'demo' %}background: #fff3cd; color: #7a5b00; border: 1px solid #e0b400;{% else %}background: #d9f5e3; color: #146c2e; border: 1px solid #5bbf7a;{% endif %} }
+  table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #bbb; padding: 4px 6px; text-align: left; vertical-align: top; }
+  th { background: #eee; } .score { font-size: 30px; font-weight: bold; }
+  .FAIL { color: #b00020; font-weight: bold; } .WARNING { color: #8a6d00; font-weight: bold; }
+  .PASS { color: #146c2e; font-weight: bold; } .NA { color: #555; font-weight: bold; }
+  .small { color: #555; font-size: 10px; }
+</style></head><body>
+<h1>Spyglass AWS Security Assessment Report</h1>
+<div class="small">Scan #{{ scan.id }} &middot; report generated {{ generated }}</div>
+<div class="banner">{% if scan.mode == 'demo' %}DEMO MODE: results come from a simulated AWS (moto), not a real account.{% else %}LIVE MODE: read-only assessment of a real AWS account.{% endif %}</div>
+
+<h2>1. Account and scan details</h2>
+<table>
+<tr><th>AWS account ID</th><td>{{ scan.account_id }}</td><th>Region</th><td>{{ scan.region }}</td></tr>
+<tr><th>Assessment time (UTC)</th><td>{{ scan.scanned_at }}</td><th>Mode</th><td>{{ scan.mode|upper }}</td></tr>
+</table>
+
+<h2>2. Security score</h2>
+<div class="score">{{ scan.score if scan.score is not none else 'N/A' }} / 100 &mdash; {{ scan.rating }}</div>
+<p>Coverage: {{ scan.coverage_pct }}% of checks could be assessed.{% if scan.not_assessed %} <b>{{ scan.not_assessed }} check(s) could not be assessed and are excluded from the score.</b>{% endif %}</p>
+<p class="small"><b>Method:</b> {{ scan.method }}</p>
+
+<h2>3. Summary of findings</h2>
+<table>
+<tr><th>Total checks</th><th>Passed</th><th>Failed</th><th>Warnings</th><th>Not assessed</th><th>Critical</th><th>High</th><th>Medium</th><th>Low</th></tr>
+<tr><td>{{ scan.total_checks }}</td><td>{{ scan.passed }}</td><td>{{ scan.failed }}</td><td>{{ scan.warnings }}</td><td>{{ scan.not_assessed }}</td>
+<td>{{ sev_counts.CRITICAL }}</td><td>{{ sev_counts.HIGH }}</td><td>{{ sev_counts.MEDIUM }}</td><td>{{ sev_counts.LOW }}</td></tr>
+</table>
+<p class="small">Severity columns count failed checks only.</p>
+
+<h2>4. Resources discovered</h2>
+<table><tr><th>Resource type</th><th>Count</th></tr>
+{% for name, n in scan.resource_counts.items() %}<tr><td>{{ name }}</td><td>{{ n if n is not none else 'NOT ASSESSED' }}</td></tr>{% endfor %}
+</table>
+
+<h2>5. Detailed security issues and remediation</h2>
+{% if not issues %}<p>No failed, warning or unassessed checks.</p>{% else %}
+<table><tr><th width="7%">Status</th><th width="7%">Severity</th><th width="14%">Check (expected condition)</th><th width="14%">Resource</th><th width="16%">Evidence</th><th width="21%">Why it matters</th><th width="21%">Remediation</th></tr>
+{% for f in issues %}
+<tr><td class="{{ f.status|replace(' ', '') if f.status != 'NOT ASSESSED' else 'NA' }}">{{ f.status }}</td><td>{{ f.severity }}</td>
+<td>{{ f.check_id }}<br>{{ f.title }}</td><td>{{ f.resource }}</td><td>{{ f.evidence }}</td><td>{{ f.description }}</td><td>{{ f.remediation }}</td></tr>
+{% endfor %}</table>{% endif %}
+
+<h2>6. Passed checks</h2>
+<table><tr><th>Check</th><th>Resource</th><th>Evidence</th></tr>
+{% for f in findings if f.status == 'PASS' %}<tr><td>{{ f.check_id }}</td><td>{{ f.resource }}</td><td>{{ f.evidence }}</td></tr>{% endfor %}
+</table>
+<p class="small">Spyglass is a read-only auditor. It does not modify AWS resources. Limitations: single region per scan; admin rights via groups or inline policies are not evaluated.</p>
+</body></html>

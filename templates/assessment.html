@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% set active = 'assessment' %}
+{% block title %}Run Assessment{% endblock %}
+{% block content %}
+<h1 class="page-title">Run Security Assessment</h1>
+<div class="page-sub">Discovers resources, runs 18 read-only check types, scores the result, and saves it.</div>
+<div class="card-panel mb-3">
+  <p>This performs only <code>List*</code>, <code>Get*</code> and <code>Describe*</code> calls. Nothing in the AWS account is created, changed or deleted.</p>
+  <button id="scanBtn" class="btn-scan">Start scan</button>
+</div>
+<div id="scanOut"></div>
+{% endblock %}

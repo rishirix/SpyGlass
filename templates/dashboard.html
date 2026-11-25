@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% set active = 'dashboard' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1 class="page-title">Security Dashboard</h1>
+{% if not scan %}
+  <div class="card-panel empty">No scans yet. <a href="/assessment">Run your first assessment</a>.</div>
+{% else %}
+  <div class="page-sub">Scan #{{ scan.id }} &middot; <span id="d-time"></span> &middot; mode <span id="d-mode"></span></div>
+  <script id="scan-data" type="application/json">{{ scan | tojson }}</script>
+
+  <div class="row g-3 mb-3">
+    <div class="col-md-3"><div class="card-panel text-center">
+      <h6>Security score</h6><div class="score-ring" id="d-score"></div>
+      <div class="muted" id="d-rating"></div><div class="muted mt-1">Coverage <span id="d-cov"></span></div></div></div>
+    <div class="col-md-9"><div class="row g-3">
+      <div class="col-6 col-md-3"><div class="card-panel"><div class="stat" id="d-total"></div><div class="stat-label">Total checks</div></div></div>
+      <div class="col-6 col-md-3"><div class="card-panel"><div class="stat" style="color:var(--pass)" id="d-pass"></div><div class="stat-label">Passed</div></div></div>
+      <div class="col-6 col-md-3"><div class="card-panel"><div class="stat" style="color:var(--fail)" id="d-fail"></div><div class="stat-label">Failed</div></div></div>
+      <div class="col-6 col-md-3"><div class="card-panel"><div class="stat" id="d-resources"></div><div class="stat-label">Resources found</div></div></div>
+      <div class="col-6 col-md-3"><div class="card-panel"><div class="stat" style="color:var(--critical)" id="d-crit"></div><div class="stat-label">Critical findings</div></div></div>
+      <div class="col-6 col-md-3"><div class="card-panel"><div class="stat" style="color:var(--high)" id="d-high"></div><div class="stat-label">High findings</div></div></div>
+      <div class="col-6 col-md-3"><div class="card-panel"><div class="stat" style="font-size:1.1rem" id="d-account"></div><div class="stat-label">AWS account</div></div></div>
+      <div class="col-6 col-md-3"><div class="card-panel"><div class="stat" style="font-size:1.1rem" id="d-region"></div><div class="stat-label">Region</div></div></div>
+    </div></div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-md-4"><div class="card-panel"><h6>Failed findings by severity</h6><div class="chart-box"><canvas id="chartSeverity"></canvas></div></div></div>
+    <div class="col-md-4"><div class="card-panel"><h6>Passed vs failed checks</h6><div class="chart-box"><canvas id="chartStatus"></canvas></div></div></div>
+    <div class="col-md-4"><div class="card-panel"><h6>Assessment distribution by service</h6><div class="chart-box"><canvas id="chartService"></canvas></div></div></div>
+  </div>
+
+  <div class="card-panel mb-3"><h6>Top failed findings</h6><div id="d-top"></div></div>
+  <div class="method-note"><b>How the score works:</b> <span id="d-method"></span></div>
+{% endif %}
+{% endblock %}

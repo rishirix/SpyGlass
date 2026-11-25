@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% set active = 'history' %}
+{% block title %}Scan History{% endblock %}
+{% block content %}
+<h1 class="page-title">Scan History</h1>
+<div class="page-sub">Every assessment is stored locally in SQLite. Demo and live scans are labelled.</div>
+<div class="card-panel">
+{% if not scans %}<div class="empty">No scans yet.</div>{% else %}
+<table class="dark"><thead><tr><th>#</th><th>When</th><th>Mode</th><th>Account</th><th>Score</th>
+<th>Pass</th><th>Fail</th><th>Warn</th><th>N/A</th><th>Coverage</th></tr></thead><tbody>
+{% for s in scans %}
+<tr><td>{{ s.id }}</td><td data-local-time="{{ s.scanned_at }}">{{ s.scanned_at }}</td>
+<td>{{ s.mode|upper }}</td><td>{{ s.account_id }}</td>
+<td><b>{{ s.score if s.score is not none else 'N/A' }}</b> {{ s.rating }}</td>
+<td>{{ s.passed }}</td><td>{{ s.failed }}</td><td>{{ s.warnings }}</td><td>{{ s.not_assessed }}</td>
+<td>{{ s.coverage_pct }}%</td></tr>
+{% endfor %}</tbody></table>{% endif %}
+</div>
+{% endblock %}

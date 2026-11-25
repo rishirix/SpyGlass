@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% set active = 'reports' %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<h1 class="page-title">Security Reports</h1>
+<div class="page-sub">Download a report for any saved scan. Reports state the mode (demo or live).</div>
+<div class="card-panel">
+{% if not scans %}<div class="empty">No scans yet. <a href="/assessment">Run an assessment</a>.</div>{% else %}
+<table class="dark"><thead><tr><th>#</th><th>When</th><th>Mode</th><th>Score</th><th>Download</th></tr></thead><tbody>
+{% for s in scans %}
+<tr><td>{{ s.id }}</td><td data-local-time="{{ s.scanned_at }}">{{ s.scanned_at }}</td><td>{{ s.mode|upper }}</td>
+<td>{{ s.score if s.score is not none else 'N/A' }}</td>
+<td><a href="/report/{{ s.id }}.html">HTML</a> &middot; <a href="/report/{{ s.id }}.pdf">PDF</a></td></tr>
+{% endfor %}</tbody></table>
+
+{% endif %}
+</div>
+{% endblock %}

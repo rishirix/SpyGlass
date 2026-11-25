@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% set active = 'findings' %}
+{% block title %}Findings{% endblock %}
+{% block content %}
+<h1 class="page-title">Detailed Findings</h1>
+<div class="page-sub" id="f-count">&nbsp;</div>
+<div class="card-panel mb-3"><div class="row g-2">
+  <div class="col-md-3"><select id="f-scan" class="form-select form-select-sm">
+    {% for s in scans %}<option value="{{ s.id }}">Scan #{{ s.id }} - {{ s.scanned_at }} ({{ s.mode }})</option>{% endfor %}
+  </select></div>
+  <div class="col-md-3"><select id="f-status" class="form-select form-select-sm"><option value="">All statuses</option>
+    <option>PASS</option><option>FAIL</option><option>WARNING</option><option>NOT ASSESSED</option></select></div>
+  <div class="col-md-3"><select id="f-sev" class="form-select form-select-sm"><option value="">All severities</option>
+    <option>CRITICAL</option><option>HIGH</option><option>MEDIUM</option><option>LOW</option></select></div>
+  <div class="col-md-3"><select id="f-svc" class="form-select form-select-sm"><option value="">All services</option>
+    <option>S3</option><option>IAM</option><option>EC2</option><option>CloudTrail</option></select></div>
+</div></div>
+<div class="card-panel" id="f-out"></div>
+{% endblock %}
