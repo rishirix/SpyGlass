@@ -31,7 +31,36 @@
     <div class="col-md-4"><div class="card-panel"><h6>Assessment distribution by service</h6><div class="chart-box"><canvas id="chartService"></canvas></div></div></div>
   </div>
 
-  <div class="card-panel mb-3"><h6>Top failed findings</h6><div id="d-top"></div></div>
+  {% if diff %}
+  <div class="card-panel mb-3">
+    <h6>Change since scan #{{ diff.prev_id }}</h6>
+    {% if diff.delta is not none %}
+      <div style="font-size:1.1rem" class="mb-2">Score {{ diff.prev_score }} &rarr; <b>{{ scan.score }}</b>
+        <b style="color: {{ 'var(--pass)' if diff.delta > 0 else ('var(--fail)' if diff.delta < 0 else 'var(--muted)') }}">
+        ({{ '%+.1f'|format(diff.delta) }})</b></div>
+    {% endif %}
+    {% if diff.changed or diff.added or diff.removed %}
+      <table class="dark"><thead><tr><th>Check</th><th>Resource</th><th>Before</th><th>After</th></tr></thead><tbody>
+      {% for c in diff.changed %}
+        <tr><td>{{ c.check_id }}</td><td>{{ c.resource }}</td>
+          <td><span class="badge-st st-{{ c.before|replace(' ', '-') }}">{{ c.before }}</span></td>
+          <td><span class="badge-st st-{{ c.after|replace(' ', '-') }}">{{ c.after }}</span></td></tr>
+      {% endfor %}
+      {% for c in diff.added %}
+        <tr><td>{{ c.check_id }}</td><td>{{ c.resource }}</td><td class="muted">new resource</td>
+          <td><span class="badge-st st-{{ c.status|replace(' ', '-') }}">{{ c.status }}</span></td></tr>
+      {% endfor %}
+      {% for c in diff.removed %}
+        <tr><td>{{ c.check_id }}</td><td>{{ c.resource }}</td>
+          <td><span class="badge-st st-{{ c.status|replace(' ', '-') }}">{{ c.status }}</span></td><td class="muted">removed</td></tr>
+      {% endfor %}
+      </tbody></table>
+    {% else %}
+      <div class="muted">No changes since the previous scan.</div>
+    {% endif %}
+  </div>
+{% endif %}
+<div class="card-panel mb-3"><h6>Top failed findings</h6><div id="d-top"></div></div>
   <div class="method-note"><b>How the score works:</b> <span id="d-method"></span></div>
 {% endif %}
 {% endblock %}

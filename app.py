@@ -52,10 +52,35 @@ def _page(name, **ctx):
 
 
 # --------------------------------------------------------------- pages --
+def _diff(prev, cur):
+    """Compare two saved scans. Returns None if they are not comparable."""
+    if prev["mode"] != cur["mode"] or prev["account_id"] != cur["account_id"]:
+        return None
+    key = lambda f: (f["check_id"], f["resource"])
+    old = {key(f): f for f in prev["findings"]}
+    new = {key(f): f for f in cur["findings"]}
+    changed = [{"check_id": k[0], "resource": k[1], "title": f["title"],
+                "before": old[k]["status"], "after": f["status"]}
+               for k, f in new.items() if k in old and old[k]["status"] != f["status"]]
+    added = [{"check_id": k[0], "resource": k[1], "status": f["status"]}
+             for k, f in new.items() if k not in old]
+    removed = [{"check_id": k[0], "resource": k[1], "status": f["status"]}
+               for k, f in old.items() if k not in new]
+    delta = None
+    if prev["score"] is not None and cur["score"] is not None:
+        delta = round(cur["score"] - prev["score"], 1)
+    return {"prev_id": prev["id"], "prev_score": prev["score"], "delta": delta,
+            "changed": changed, "added": added, "removed": removed}
+
+
 @app.get("/")
 def dashboard():
-    scans = database.list_scans(1)
-    return _page("dashboard.html", scan=database.get_scan(scans[0]["id"]) if scans else None)
+    scans = database.list_scans(2)
+    if not scans:
+        return _page("dashboard.html", scan=None, diff=None)
+    cur = database.get_scan(scans[0]["id"])
+    diff = _diff(database.get_scan(scans[1]["id"]), cur) if len(scans) > 1 else None
+    return _page("dashboard.html", scan=cur, diff=diff)
 
 
 @app.get("/inventory")
